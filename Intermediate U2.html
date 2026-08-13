@@ -1,0 +1,632 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Тренер словаря - Intermediate U2</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            max-width: 600px;
+            width: 100%;
+            padding: 40px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 28px;
+        }
+
+        .header p {
+            color: #666;
+            font-size: 14px;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: #e0e0e0;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+            transition: width 0.3s ease;
+        }
+
+        .mode-selector {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        .mode-btn {
+            flex: 1;
+            padding: 15px;
+            border: 2px solid #e0e0e0;
+            background: white;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            color: #666;
+        }
+
+        .mode-btn.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-color: #667eea;
+            color: white;
+            transform: scale(1.02);
+        }
+
+        .card {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 40px;
+            text-align: center;
+            min-height: 400px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            gap: 20px;
+        }
+
+        .card.hidden {
+            display: none;
+        }
+
+        .counter {
+            color: #999;
+            font-size: 14px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .word-ru {
+            font-size: 18px;
+            color: #999;
+            margin: 10px 0;
+        }
+
+        .word-en {
+            font-size: 42px;
+            font-weight: bold;
+            color: #667eea;
+            margin: 20px 0;
+            letter-spacing: 1px;
+        }
+
+        .input-area {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            margin: 20px 0;
+        }
+
+        .input-display {
+            width: 100%;
+            padding: 20px;
+            border: 3px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 28px;
+            text-align: center;
+            background: white;
+            font-weight: 600;
+            color: #333;
+            min-height: 60px;
+            transition: all 0.3s;
+        }
+
+        .input-display.correct {
+            border-color: #4caf50;
+            background: #f1f8f4;
+            color: #4caf50;
+        }
+
+        .input-display.wrong {
+            border-color: #f44336;
+            background: #fdf6f6;
+            color: #f44336;
+        }
+
+        .feedback {
+            font-size: 16px;
+            min-height: 24px;
+            font-weight: 600;
+        }
+
+        .feedback.correct {
+            color: #4caf50;
+        }
+
+        .feedback.wrong {
+            color: #f44336;
+        }
+
+        .nav-buttons {
+            display: flex;
+            gap: 12px;
+            margin-top: 20px;
+        }
+
+        .nav-btn, .check-btn, .skip-btn {
+            flex: 1;
+            padding: 15px;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .nav-btn {
+            background: #e0e0e0;
+            color: #333;
+        }
+
+        .nav-btn:hover {
+            background: #d0d0d0;
+            transform: translateY(-2px);
+        }
+
+        .nav-btn:active {
+            transform: scale(0.98);
+        }
+
+        .check-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            width: 100%;
+        }
+
+        .check-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        .skip-btn {
+            background: #999;
+            color: white;
+            flex: 0.5;
+        }
+
+        .skip-btn:hover {
+            background: #777;
+        }
+
+        .stats {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 20px;
+            text-align: center;
+            display: none;
+        }
+
+        .stats.show {
+            display: block;
+        }
+
+        .stats h3 {
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .stat-row {
+            display: flex;
+            justify-content: space-around;
+            margin: 10px 0;
+        }
+
+        .stat-item {
+            flex: 1;
+        }
+
+        .stat-number {
+            font-size: 24px;
+            font-weight: bold;
+            color: #667eea;
+        }
+
+        .stat-label {
+            font-size: 12px;
+            color: #999;
+        }
+
+        #testQuestion.hidden {
+            display: none;
+        }
+
+        .wrong-list {
+            text-align: left;
+            margin-top: 20px;
+            max-height: 260px;
+            overflow-y: auto;
+        }
+
+        .wrong-item {
+            display: flex;
+            justify-content: space-between;
+            gap: 10px;
+            padding: 10px 12px;
+            border-radius: 8px;
+            background: #fdf6f6;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+
+        .wrong-item .w-ru {
+            color: #666;
+        }
+
+        .wrong-item .w-en {
+            color: #f44336;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                padding: 20px;
+            }
+
+            .card {
+                padding: 20px;
+                min-height: 350px;
+            }
+
+            .word-en {
+                font-size: 32px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="header">
+        <h1>📚 Тренер словаря</h1>
+        <p>Intermediate Unit 2 — 30 слов</p>
+    </div>
+
+    <div class="progress-bar">
+        <div class="progress-fill" id="progress"></div>
+    </div>
+
+    <div class="mode-selector">
+        <button class="mode-btn active" id="modeLearn" onclick="switchMode('learn')">🎓 Обучение</button>
+        <button class="mode-btn" id="modeTest" onclick="switchMode('test')">✏️ Тест</button>
+    </div>
+
+    <!-- РЕЖИМ ОБУЧЕНИЯ -->
+    <div id="learningMode" class="card">
+        <div class="counter" id="learnCounter">1 / 30</div>
+        <div class="word-ru" id="learnRu">плавать, парить</div>
+        <div class="word-en" id="learnEn">float</div>
+        <div class="word-uz" id="learnUz" style="font-size: 16px; color: #764ba2; font-weight: 600;">suzmoq, uchmoq</div>
+        <div class="nav-buttons">
+            <button class="nav-btn" onclick="prevWord()">← Назад</button>
+            <button class="nav-btn" onclick="nextWord()">Вперёд →</button>
+        </div>
+    </div>
+
+    <!-- РЕЖИМ ТЕСТИРОВАНИЯ -->
+    <div id="testMode" class="card hidden">
+        <div id="testQuestion">
+            <div class="counter" id="testCounter">1 / 30</div>
+            <div class="word-ru" id="testRu">плавать, парить</div>
+            <div class="word-uz" id="testUz" style="font-size: 16px; color: #764ba2; font-weight: 600;">suzmoq, uchmoq</div>
+
+            <div class="input-area">
+                <input type="text" class="input-display" id="inputDisplay" placeholder="введите ответ..." autocomplete="off" autocapitalize="off" spellcheck="false">
+                <div class="feedback" id="feedback"></div>
+            </div>
+
+            <div class="nav-buttons">
+                <button class="skip-btn" onclick="skipQuestion()">Пропустить</button>
+                <button class="check-btn" onclick="checkAnswer()">Проверить (Enter)</button>
+            </div>
+        </div>
+
+        <div class="stats" id="stats">
+            <h3>Ваш результат</h3>
+            <div class="stat-row">
+                <div class="stat-item">
+                    <div class="stat-number" id="correctCount">0</div>
+                    <div class="stat-label">Правильно</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number" id="wrongCount">0</div>
+                    <div class="stat-label">Неправильно</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number" id="skipCount">0</div>
+                    <div class="stat-label">Пропущено</div>
+                </div>
+            </div>
+            <div id="wrongList" class="wrong-list"></div>
+            <button class="check-btn" style="margin-top: 20px;" onclick="restartTest()">Пройти заново</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    const words = [
+        { ru: "плавать, парить", en: "float", uz: "suzmoq, uchmoq", pos: "v" },
+        { ru: "напоминать", en: "remind", uz: "eslatmoq", pos: "v" },
+        { ru: "поверхность", en: "surface", uz: "yuza", pos: "n" },
+        { ru: "расточать", en: "waste", uz: "isrof qilmoq", pos: "v" },
+        { ru: "обычный", en: "ordinary", uz: "odatiy", pos: "adj" },
+        { ru: "череп", en: "skull", uz: "bosh suyagi", pos: "n" },
+        { ru: "выживать", en: "survive", uz: "tirik qolmoq", pos: "v" },
+        { ru: "шептать", en: "whisper", uz: "pichirlamoq", pos: "v" },
+        { ru: "дыхание", en: "breath", uz: "nafas", pos: "n" },
+        { ru: "появляться", en: "appear", uz: "paydo bo'lmoq", pos: "v" },
+        { ru: "нанимать", en: "hire", uz: "yollash", pos: "v" },
+        { ru: "лично", en: "personally", uz: "shaxsan", pos: "adv" },
+        { ru: "кислый", en: "sour", uz: "nordon", pos: "adj" },
+        { ru: "попытка", en: "attempt", uz: "urinish", pos: "n" },
+        { ru: "распознавать, узнать", en: "recognize", uz: "tanimoq", pos: "v" },
+        { ru: "заряжать", en: "charge", uz: "zaryadlamoq, quvvatlantirmoq", pos: "v" },
+        { ru: "к несчастью", en: "unfortunately", uz: "afsuski", pos: "adv" },
+        { ru: "фальсификация", en: "hoax", uz: "yolg'on", pos: "n" },
+        { ru: "слабый", en: "weak", uz: "zaif, kuchsiz", pos: "adj" },
+        { ru: "ожидать, рассчитывать", en: "expect", uz: "kutmoq, umiq qulmoq", pos: "v" },
+        { ru: "отслеживать", en: "track", uz: "kuzatmoq", pos: "v" },
+        { ru: "челюсть", en: "jaw", uz: "jag'", pos: "n" },
+        { ru: "изобретать", en: "invent", uz: "kashf etmoq", pos: "v" },
+        { ru: "распространять", en: "circulate", uz: "tarqalmoq", pos: "v" },
+        { ru: "совпадение", en: "coincidence", uz: "tasodif", pos: "n" },
+        { ru: "побег", en: "escape", uz: "qochish, qutilish", pos: "n" },
+        { ru: "что интересно", en: "interestingly", uz: "qiziqarlisi shu-ki", pos: "adv" },
+        { ru: "брать интервью", en: "interview", uz: "suhbat olmoq", pos: "v" },
+        { ru: "объявить", en: "announce", uz: "e'lon qilmoq", pos: "v" },
+        { ru: "свидетельство", en: "evidence", uz: "dalil, isbot", pos: "n" }
+    ];
+
+    let learnIndex = 0;
+    let userInput = "";
+    let currentMode = 'learn';
+    let answered = false;
+
+    // Очередь текущего раунда теста (индексы слов) и очередь пропущенных для следующего раунда
+    let testQueue = [];
+    let testPointer = 0;
+    let nextRoundQueue = [];
+    let wrongAnswers = []; // { ru, en } — слова, отвеченные неправильно
+    let testFinished = false;
+    let testStats = {
+        correct: 0,
+        wrong: 0,
+        skipped: 0
+    };
+
+    function initTest() {
+        testQueue = words.map((_, i) => i);
+        testPointer = 0;
+        nextRoundQueue = [];
+        wrongAnswers = [];
+        testFinished = false;
+        testStats = { correct: 0, wrong: 0, skipped: 0 };
+        updateStats();
+        document.getElementById('wrongList').innerHTML = '';
+        document.getElementById('stats').classList.remove('show');
+        document.getElementById('testQuestion').classList.remove('hidden');
+    }
+
+    function restartTest() {
+        initTest();
+        updateTestDisplay();
+        clearInput();
+        document.getElementById('inputDisplay').focus();
+    }
+
+    function currentTestWordIndex() {
+        return testQueue[testPointer];
+    }
+
+    function clearInput() {
+        userInput = '';
+        answered = false;
+        const inputEl = document.getElementById('inputDisplay');
+        inputEl.value = '';
+        document.getElementById('feedback').textContent = '';
+        inputEl.className = 'input-display';
+    }
+
+    function checkAnswer() {
+        if (answered) {
+            advanceTest();
+            return;
+        }
+
+        userInput = document.getElementById('inputDisplay').value;
+        if (!userInput.trim()) {
+            document.getElementById('feedback').textContent = 'Введите ответ!';
+            document.getElementById('feedback').className = 'feedback wrong';
+            return;
+        }
+
+        const wordIdx = currentTestWordIndex();
+        const correct = words[wordIdx].en.toLowerCase();
+        answered = true;
+        if (userInput.trim() === correct) {
+            document.getElementById('feedback').textContent = '✓ Правильно! (Enter — дальше)';
+            document.getElementById('feedback').className = 'feedback correct';
+            document.getElementById('inputDisplay').className = 'input-display correct';
+            testStats.correct++;
+        } else {
+            document.getElementById('feedback').textContent = `✗ Ответ: ${correct} (Enter — дальше)`;
+            document.getElementById('feedback').className = 'feedback wrong';
+            document.getElementById('inputDisplay').className = 'input-display wrong';
+            testStats.wrong++;
+            wrongAnswers.push({ ru: words[wordIdx].ru, en: words[wordIdx].en });
+        }
+        updateStats();
+    }
+
+    function skipQuestion() {
+        const wordIdx = currentTestWordIndex();
+        nextRoundQueue.push(wordIdx);
+        testStats.skipped++;
+        updateStats();
+        advanceTest();
+    }
+
+    function advanceTest() {
+        testPointer++;
+
+        if (testPointer >= testQueue.length) {
+            if (nextRoundQueue.length > 0) {
+                // Новый раунд — повторяем только пропущенные слова
+                testQueue = nextRoundQueue;
+                nextRoundQueue = [];
+                testPointer = 0;
+                updateTestDisplay();
+                clearInput();
+                document.getElementById('inputDisplay').focus();
+            } else {
+                showTestResults();
+            }
+        } else {
+            updateTestDisplay();
+            clearInput();
+            document.getElementById('inputDisplay').focus();
+        }
+    }
+
+    function showTestResults() {
+        testFinished = true;
+        document.getElementById('testQuestion').classList.add('hidden');
+        document.getElementById('stats').classList.add('show');
+
+        const wrongListEl = document.getElementById('wrongList');
+        if (wrongAnswers.length === 0) {
+            wrongListEl.innerHTML = '';
+        } else {
+            wrongListEl.innerHTML = '<h3 style="margin-bottom: 10px; font-size: 15px;">Ошибки</h3>' +
+                wrongAnswers.map(w =>
+                    `<div class="wrong-item"><span class="w-ru">${w.ru}</span><span class="w-en">${w.en}</span></div>`
+                ).join('');
+        }
+        document.getElementById('progress').style.width = '100%';
+    }
+
+    function updateTestDisplay() {
+        const wordIdx = currentTestWordIndex();
+        document.getElementById('testRu').textContent = words[wordIdx].ru;
+        document.getElementById('testUz').textContent = words[wordIdx].uz;
+        document.getElementById('testCounter').textContent = (testPointer + 1) + ' / ' + testQueue.length;
+        updateProgress();
+    }
+
+    function nextWord() {
+        learnIndex = (learnIndex + 1) % words.length;
+        updateLearnDisplay();
+    }
+
+    function prevWord() {
+        learnIndex = (learnIndex - 1 + words.length) % words.length;
+        updateLearnDisplay();
+    }
+
+    function updateLearnDisplay() {
+        document.getElementById('learnRu').textContent = words[learnIndex].ru;
+        document.getElementById('learnEn').textContent = words[learnIndex].en;
+        document.getElementById('learnUz').textContent = words[learnIndex].uz;
+        document.getElementById('learnCounter').textContent = (learnIndex + 1) + ' / ' + words.length;
+        updateProgress();
+    }
+
+    function updateProgress() {
+        if (currentMode === 'learn') {
+            document.getElementById('progress').style.width = ((learnIndex + 1) / words.length * 100) + '%';
+        } else if (!testFinished) {
+            document.getElementById('progress').style.width = ((testPointer + 1) / testQueue.length * 100) + '%';
+        }
+    }
+
+    function updateStats() {
+        document.getElementById('correctCount').textContent = testStats.correct;
+        document.getElementById('wrongCount').textContent = testStats.wrong;
+        document.getElementById('skipCount').textContent = testStats.skipped;
+    }
+
+    function switchMode(mode) {
+        currentMode = mode;
+        if (mode === 'learn') {
+            document.getElementById('learningMode').classList.remove('hidden');
+            document.getElementById('testMode').classList.add('hidden');
+            document.getElementById('modeLearn').classList.add('active');
+            document.getElementById('modeTest').classList.remove('active');
+            updateLearnDisplay();
+        } else {
+            document.getElementById('learningMode').classList.add('hidden');
+            document.getElementById('testMode').classList.remove('hidden');
+            document.getElementById('modeLearn').classList.remove('active');
+            document.getElementById('modeTest').classList.add('active');
+
+            if (testQueue.length === 0 && !testFinished) {
+                initTest();
+            }
+
+            if (testFinished) {
+                showTestResults();
+            } else {
+                updateTestDisplay();
+                clearInput();
+                document.getElementById('inputDisplay').focus();
+            }
+        }
+    }
+
+    // Клавиша Enter для проверки ответа
+    document.getElementById('inputDisplay').addEventListener('keypress', (e) => {
+        if (e.key === 'Enter' && currentMode === 'test') {
+            checkAnswer();
+        }
+    });
+
+    // Разрешаем вводить только английские буквы (и пробел, восклицательный знак — для "Good bye!")
+    document.getElementById('inputDisplay').addEventListener('input', (e) => {
+        const filtered = e.target.value.replace(/[^a-zA-Z !'-]/g, '');
+        if (filtered !== e.target.value) {
+            e.target.value = filtered;
+        }
+    });
+
+    updateLearnDisplay();
+</script>
+
+</body>
+</html>
